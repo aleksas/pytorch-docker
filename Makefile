@@ -23,8 +23,6 @@ SRC_DIR_PYTORCH		=
 SRC_DIR_TORCHVISION	=
 
 PYTHON_VERSION   = 3.7
-# Can be either official / dev
-# BUILD_TYPE       = dev
 BUILD_PROGRESS   = auto
 BUILD_ARGS       = --build-arg BASE_IMAGE=$(BASE_IMAGE) \
 					--build-arg FINAL_IMAGE=$(FINAL_IMAGE) \
