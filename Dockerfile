@@ -73,6 +73,7 @@ COPY ${SRC_DIR_TORCHVISION} /opt/torchvision
 RUN cd /opt/pytorch && git submodule update --init --recursive
 
 FROM conda as build
+ARG WITH_CUDA=
 COPY --from=source /opt/pytorch /opt/pytorch
 COPY --from=source /opt/torchvision /opt/torchvision
 RUN --mount=type=cache,target=/opt/ccache \
@@ -88,16 +89,28 @@ RUN --mount=type=cache,target=/opt/ccache \
     cp -r torch/bin torch/include torch/lib torch/share $(dirname $(which conda))/../
 RUN --mount=type=cache,target=/opt/ccache \
     cd /opt/torchvision && \
-    TORCH_CUDA_ARCH_LIST="3.5 5.2 6.0 6.1 7.0+PTX" TORCH_NVCC_FLAGS="-Xfatbin -compress-all" \
-    CMAKE_PREFIX_PATH="$(dirname $(which conda))/../" \
-    python setup.py install
+    if [ -n "${WITH_CUDA}" ]; then \
+        FORCE_CUDA=1 TORCH_CUDA_ARCH_LIST="3.5 5.2 6.0 6.1 7.0+PTX" TORCH_NVCC_FLAGS="-Xfatbin -compress-all" \
+        CMAKE_PREFIX_PATH="$(dirname $(which conda))/../" \
+        python setup.py install \
+    else \
+        TORCH_CUDA_ARCH_LIST="3.5 5.2 6.0 6.1 7.0+PTX" TORCH_NVCC_FLAGS="-Xfatbin -compress-all" \
+        CMAKE_PREFIX_PATH="$(dirname $(which conda))/../" \
+        python setup.py install \
+    fi
 RUN --mount=type=cache,target=/opt/ccache \
     cd /opt/torchvision && \
     mkdir -p build && \
     cd build && \
-    CMAKE_PREFIX_PATH="$(dirname $(which conda))/../"  cmake -DCMAKE_INSTALL_PREFIX="$(dirname $(which conda))/../" .. && \
-    make -j $(cat /proc/stat | grep cpu[0-9] -c) && \
-    make install
+    if [ -n "${WITH_CUDA}" ]; then \
+        CMAKE_PREFIX_PATH="$(dirname $(which conda))/../"  cmake -DCMAKE_INSTALL_PREFIX="$(dirname $(which conda))/../" .. && \
+        make -DWITH_CUDA=on -j $(cat /proc/stat | grep cpu[0-9] -c) && \
+        make install \
+    else \
+        CMAKE_PREFIX_PATH="$(dirname $(which conda))/../"  cmake -DCMAKE_INSTALL_PREFIX="$(dirname $(which conda))/../" .. && \
+        make -j $(cat /proc/stat | grep cpu[0-9] -c) && \
+        make install \
+    fi
 
 FROM build as conda-installs
 ARG INSTALL_CHANNEL=pytorch

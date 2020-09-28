@@ -26,7 +26,7 @@ PYTHON_VERSION   = 3.7
 BUILD_PROGRESS   = auto
 BUILD_ARGS       = --build-arg BASE_IMAGE=$(BASE_IMAGE) \
 					--build-arg FINAL_IMAGE=$(FINAL_IMAGE) \
-					--build-arg APT_CUDA=$(APT_CUDA) \
+					--build-arg APT_CUDA_ENABLE=$(APT_CUDA_ENABLE) \
 					--build-arg PYTHON_VERSION=$(PYTHON_VERSION) \
 					--build-arg EXTRA_APT_PACKAGE=$(EXTRA_APT_PACKAGE) \
 					--build-arg EXTRA_CONDA_PACKAGE=$(EXTRA_CONDA_PACKAGE) \
@@ -44,7 +44,8 @@ push: cpu-devel-push cpu-runtime-push cuda-devel-push cuda-runtime-push
 .PHONY: cpu-devel-image
 cpu-devel-image: BASE_IMAGE := $(CPU_IMAGE_DEVEL)
 cpu-devel-image: FINAL_IMAGE := $(CPU_IMAGE_DEVEL)
-cpu-devel-image: APT_CUDA := 
+cpu-devel-image: APT_CUDA_ENABLE := 
+cpu-devel-image: WITH_CUDA := 
 cpu-devel-image: SRC_DIR_PYTORCH := pytorch
 cpu-devel-image: SRC_DIR_TORCHVISION := torchvision
 cpu-devel-image: BUILD_TYPE := dev
@@ -61,7 +62,8 @@ cpu-devel-push:
 .PHONY: cpu-runtime-image
 cpu-runtime-image: BASE_IMAGE := $(CPU_IMAGE_DEVEL)
 cpu-runtime-image: FINAL_IMAGE := $(CPU_IMAGE_RUNTIME)
-cpu-runtime-image: APT_CUDA := 
+cpu-runtime-image: APT_CUDA_ENABLE := 
+cpu-runtime-image: WITH_CUDA := 
 cpu-runtime-image: SRC_DIR_PYTORCH := pytorch
 cpu-runtime-image: SRC_DIR_TORCHVISION := torchvision
 cpu-runtime-image: BUILD_TYPE := official
@@ -78,7 +80,8 @@ cpu-runtime-push:
 .PHONY: cuda-devel-image
 cuda-devel-image: BASE_IMAGE := $(CUDA_IMAGE_DEVEL)
 cuda-devel-image: FINAL_IMAGE := $(CUDA_IMAGE_DEVEL)
-cuda-devel-image: APT_CUDA := 1
+cuda-devel-image: APT_CUDA_ENABLE := 1
+cuda-devel-image: WITH_CUDA := 1
 cuda-devel-image: SRC_DIR_PYTORCH := pytorch
 cuda-devel-image: SRC_DIR_TORCHVISION := torchvision
 cuda-devel-image: BUILD_TYPE := dev
@@ -95,7 +98,8 @@ cuda-devel-push:
 .PHONY: cuda-runtime-image
 cuda-runtime-image: BASE_IMAGE := $(CUDA_IMAGE_DEVEL)
 cuda-runtime-image: FINAL_IMAGE := $(CUDA_IMAGE_RUNTIME)
-cuda-runtime-image: APT_CUDA := 1
+cuda-runtime-image: APT_CUDA_ENABLE := 1
+cuda-runtime-image: WITH_CUDA := 1
 cuda-runtime-image: SRC_DIR_PYTORCH := pytorch
 cuda-runtime-image: SRC_DIR_TORCHVISION := torchvision
 cuda-runtime-image: BUILD_TYPE := official
