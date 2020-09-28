@@ -65,6 +65,10 @@ echo '######################################################'
 echo
 LoadGitSource $REPO_PYTORCH $PY_VERSION $DIR_PYTORCH
 echo
+echo init pytorch submodules
+cd $DIR_PYTORCH && git submodule update --init --recursive && cd ..
+CheckCode 'init pytorch submodules failed'
+echo
 LoadGitSource $REPO_TORCHVISION $VI_VERSION $DIR_TORCHVISION
 echo
 echo init success
