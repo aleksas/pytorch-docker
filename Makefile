@@ -27,6 +27,7 @@ BUILD_PROGRESS   = auto
 BUILD_ARGS       = --build-arg BASE_IMAGE=$(BASE_IMAGE) \
 					--build-arg FINAL_IMAGE=$(FINAL_IMAGE) \
 					--build-arg APT_CUDA_ENABLE=$(APT_CUDA_ENABLE) \
+					--build-arg WITH_CUDA=$(WITH_CUDA) \
 					--build-arg PYTHON_VERSION=$(PYTHON_VERSION) \
 					--build-arg EXTRA_APT_PACKAGE=$(EXTRA_APT_PACKAGE) \
 					--build-arg EXTRA_CONDA_PACKAGE=$(EXTRA_CONDA_PACKAGE) \
