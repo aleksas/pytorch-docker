@@ -92,11 +92,11 @@ RUN --mount=type=cache,target=/opt/ccache \
     if [ -n "${WITH_CUDA}" ]; then \
         FORCE_CUDA=1 TORCH_CUDA_ARCH_LIST="3.5 5.2 6.0 6.1 7.0+PTX" TORCH_NVCC_FLAGS="-Xfatbin -compress-all" \
         CMAKE_PREFIX_PATH="$(dirname $(which conda))/../" \
-        python setup.py install \
+        python setup.py install; \
     else \
         TORCH_CUDA_ARCH_LIST="3.5 5.2 6.0 6.1 7.0+PTX" TORCH_NVCC_FLAGS="-Xfatbin -compress-all" \
         CMAKE_PREFIX_PATH="$(dirname $(which conda))/../" \
-        python setup.py install \
+        python setup.py install; \
     fi
 RUN --mount=type=cache,target=/opt/ccache \
     cd /opt/torchvision && \
@@ -105,11 +105,11 @@ RUN --mount=type=cache,target=/opt/ccache \
     if [ -n "${WITH_CUDA}" ]; then \
         CMAKE_PREFIX_PATH="$(dirname $(which conda))/../"  cmake -DCMAKE_INSTALL_PREFIX="$(dirname $(which conda))/../" .. && \
         make -DWITH_CUDA=on -j $(cat /proc/stat | grep cpu[0-9] -c) && \
-        make install \
+        make install; \
     else \
         CMAKE_PREFIX_PATH="$(dirname $(which conda))/../"  cmake -DCMAKE_INSTALL_PREFIX="$(dirname $(which conda))/../" .. && \
         make -j $(cat /proc/stat | grep cpu[0-9] -c) && \
-        make install \
+        make install; \
     fi
 
 FROM build as conda-installs
