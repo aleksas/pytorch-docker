@@ -73,3 +73,8 @@ $RECYCLE.BIN/
 
 # End of https://www.toptal.com/developers/gitignore/api/macos,linux,windows
 
+## ignore torch source
+pytorch
+pytorch_v*
+torchvision
+torchvision_v*
