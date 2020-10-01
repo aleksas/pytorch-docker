@@ -103,8 +103,8 @@ RUN --mount=type=cache,target=/opt/ccache \
     mkdir -p build && \
     cd build && \
     if [ -n "${WITH_CUDA}" ]; then \
-        CMAKE_PREFIX_PATH="$(dirname $(which conda))/../"  cmake -DCMAKE_INSTALL_PREFIX="$(dirname $(which conda))/../" .. && \
-        make -DWITH_CUDA=on -j $(cat /proc/stat | grep cpu[0-9] -c) && \
+        CMAKE_PREFIX_PATH="$(dirname $(which conda))/../"  cmake -DCMAKE_INSTALL_PREFIX="$(dirname $(which conda))/../" -DWITH_CUDA=on .. && \
+        make -j $(cat /proc/stat | grep cpu[0-9] -c) && \
         make install; \
     else \
         CMAKE_PREFIX_PATH="$(dirname $(which conda))/../"  cmake -DCMAKE_INSTALL_PREFIX="$(dirname $(which conda))/../" .. && \
