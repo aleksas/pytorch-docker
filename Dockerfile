@@ -12,14 +12,9 @@ ARG FINAL_IMAGE=${BASE_IMAGE}
 
 FROM ${BASE_IMAGE} as dev-base
 ARG EXTRA_APT_PACKAGE=
-ARG APT_CUDA_ENABLE=
 RUN --mount=type=cache,id=apt-dev,target=/var/cache/apt \
-    if [ -n "${APT_CUDA_ENABLE}" ]; then \
-        apt-get -o Dir::Etc::SourceParts='' update && \
-        apt-get install -y --no-install-recommends curl && \
-        curl -sSL https://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1804/x86_64/7fa2af80.pub | apt-key add - && \
-        curl -sSL https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/7fa2af80.pub | apt-key add -; \
-    fi && \
+    rm -rf /etc/apt/sources.list.d/cuda.list* && \
+    rm -rf /etc/apt/sources.list.d/nvidia-ml.list* && \
     apt-get update && apt-get install -y --no-install-recommends \
         build-essential \
         ca-certificates \
@@ -112,21 +107,11 @@ RUN --mount=type=cache,target=/opt/ccache \
         make install; \
     fi
 
-FROM build as conda-installs
-ARG INSTALL_CHANNEL=pytorch
-RUN /opt/conda/bin/conda install -c "${INSTALL_CHANNEL}" -y cudatoolkit=10.1 && \
-    /opt/conda/bin/conda clean -ya
-
 FROM ${FINAL_IMAGE} as official
-ARG APT_CUDA_ENABLE=
 LABEL com.nvidia.volumes.needed="nvidia_driver"
 RUN --mount=type=cache,id=apt-final,target=/var/cache/apt \
-    if [ -n "${APT_CUDA_ENABLE}" ]; then \
-        apt-get -o Dir::Etc::SourceParts='' update && \
-        apt-get install -y --no-install-recommends curl && \
-        curl -sSL https://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1804/x86_64/7fa2af80.pub | apt-key add - && \
-        curl -sSL https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/7fa2af80.pub | apt-key add -; \
-    fi && \
+    rm -rf /etc/apt/sources.list.d/cuda.list* && \
+    rm -rf /etc/apt/sources.list.d/nvidia-ml.list* && \
     apt-get update && apt-get install -y --no-install-recommends \
         ca-certificates \
         libjpeg-dev \
@@ -138,20 +123,20 @@ RUN --mount=type=cache,id=apt-final,target=/var/cache/apt \
     apt-get upgrade -y && \
     apt-get autoremove -y && \
     rm -rf /var/lib/apt/lists/*
-COPY --from=conda-installs /opt/conda /opt/conda
+COPY --from=build /opt/conda /opt/conda
 ENV PATH /opt/conda/bin:$PATH
 ENV NVIDIA_VISIBLE_DEVICES all
 ENV NVIDIA_DRIVER_CAPABILITIES compute,utility
-ENV LD_LIBRARY_PATH /opt/conda/lib:/usr/local/nvidia/lib:/usr/local/nvidia/lib64:$LD_LIBRARY_PATH
+ENV LD_LIBRARY_PATH /opt/conda/lib:/opt/conda/lib64:/usr/local/nvidia/lib:/usr/local/nvidia/lib64:$LD_LIBRARY_PATH
 WORKDIR /workspace
 
 FROM dev-base as dev
 LABEL com.nvidia.volumes.needed="nvidia_driver"
-COPY --from=conda-installs /opt/conda /opt/conda
+COPY --from=build /opt/conda /opt/conda
 COPY --from=build /opt/pytorch /opt/pytorch
 COPY --from=build /opt/torchvision /opt/torchvision
 ENV PATH /opt/conda/bin:$PATH
 ENV NVIDIA_VISIBLE_DEVICES all
 ENV NVIDIA_DRIVER_CAPABILITIES compute,utility
-ENV LD_LIBRARY_PATH /opt/conda/lib:/usr/local/nvidia/lib:/usr/local/nvidia/lib64:$LD_LIBRARY_PATH
+ENV LD_LIBRARY_PATH /opt/conda/lib:/opt/conda/lib64:/usr/local/nvidia/lib:/usr/local/nvidia/lib64:$LD_LIBRARY_PATH
 WORKDIR /workspace
