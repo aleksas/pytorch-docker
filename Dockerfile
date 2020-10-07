@@ -78,18 +78,18 @@ RUN --mount=type=cache,target=/opt/ccache \
     python setup.py install
 RUN --mount=type=cache,target=/opt/ccache \
     cd /opt/pytorch && \
-    TORCH_CUDA_ARCH_LIST="3.5 5.2 6.0 6.1 7.0+PTX" TORCH_NVCC_FLAGS="-Xfatbin -compress-all" \
+    TORCH_CUDA_ARCH_LIST="3.5 5.2 6.0 6.1 7.0 7.5 8.0+PTX" TORCH_NVCC_FLAGS="-Xfatbin -compress-all" \
     CMAKE_PREFIX_PATH="$(dirname $(which conda))/../" \
     python tools/build_libtorch.py && \
     cp -r torch/bin torch/include torch/lib torch/share $(dirname $(which conda))/../
 RUN --mount=type=cache,target=/opt/ccache \
     cd /opt/torchvision && \
     if [ -n "${WITH_CUDA}" ]; then \
-        FORCE_CUDA=1 TORCH_CUDA_ARCH_LIST="3.5 5.2 6.0 6.1 7.0+PTX" TORCH_NVCC_FLAGS="-Xfatbin -compress-all" \
+        TORCH_CUDA_ARCH_LIST="3.5 5.2 6.0 6.1 7.0 7.5 8.0+PTX" TORCH_NVCC_FLAGS="-Xfatbin -compress-all" \
         CMAKE_PREFIX_PATH="$(dirname $(which conda))/../" \
         python setup.py install; \
     else \
-        TORCH_CUDA_ARCH_LIST="3.5 5.2 6.0 6.1 7.0+PTX" TORCH_NVCC_FLAGS="-Xfatbin -compress-all" \
+        TORCH_CUDA_ARCH_LIST="3.5 5.2 6.0 6.1 7.0 7.5 8.0+PTX" TORCH_NVCC_FLAGS="-Xfatbin -compress-all" \
         CMAKE_PREFIX_PATH="$(dirname $(which conda))/../" \
         python setup.py install; \
     fi
@@ -98,10 +98,12 @@ RUN --mount=type=cache,target=/opt/ccache \
     mkdir -p build && \
     cd build && \
     if [ -n "${WITH_CUDA}" ]; then \
+        TORCH_CUDA_ARCH_LIST="3.5 5.2 6.0 6.1 7.0 7.5 8.0+PTX" TORCH_NVCC_FLAGS="-Xfatbin -compress-all" \
         CMAKE_PREFIX_PATH="$(dirname $(which conda))/../"  cmake -DCMAKE_INSTALL_PREFIX="$(dirname $(which conda))/../" -DWITH_CUDA=on .. && \
         make -j $(cat /proc/stat | grep cpu[0-9] -c) && \
         make install; \
     else \
+        TORCH_CUDA_ARCH_LIST="3.5 5.2 6.0 6.1 7.0 7.5 8.0+PTX" TORCH_NVCC_FLAGS="-Xfatbin -compress-all" \
         CMAKE_PREFIX_PATH="$(dirname $(which conda))/../"  cmake -DCMAKE_INSTALL_PREFIX="$(dirname $(which conda))/../" .. && \
         make -j $(cat /proc/stat | grep cpu[0-9] -c) && \
         make install; \
