@@ -73,7 +73,7 @@ COPY --from=source /opt/pytorch /opt/pytorch
 COPY --from=source /opt/torchvision /opt/torchvision
 RUN --mount=type=cache,target=/opt/ccache \
     cd /opt/pytorch && \
-    TORCH_CUDA_ARCH_LIST="3.5 5.2 6.0 6.1 7.0+PTX" TORCH_NVCC_FLAGS="-Xfatbin -compress-all" \
+    TORCH_CUDA_ARCH_LIST="3.5 5.2 6.0 6.1 7.0 7.5 8.0+PTX" TORCH_NVCC_FLAGS="-Xfatbin -compress-all" \
     CMAKE_PREFIX_PATH="$(dirname $(which conda))/../" \
     python setup.py install
 RUN --mount=type=cache,target=/opt/ccache \
