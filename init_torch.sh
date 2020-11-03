@@ -8,6 +8,7 @@ PY_VERSION=''
 VI_VERSION=''
 # pytorch version => vision version
 declare -A VER_MAP=(
+        ['v1.7.0']='v0.8.0'
         ['v1.6.0']='v0.7.0'
         ['v1.5.1']='v0.6.1'
         ['v1.5.0']='v0.6.0'
@@ -15,7 +16,9 @@ declare -A VER_MAP=(
         ['v1.3.1']='v0.4.2'
         ['v1.3.0']='v0.4.1'
         ['v1.2.0']='v0.4.0'
-        ['v1.1.0']='v0.3.0'        
+        ['v1.1.0']='v0.3.0'
+        ['master']='master'
+        ['nightly']='nightly'
     )
 
 function CheckCode() {
@@ -29,6 +32,7 @@ function LoadGitSource() {
     REPO="$1"
     VERSION="$2"
     DIR="$3"
+    COMMIT="$4"
     if [ -z $REPO ] || [ -z $VERSION ] || [ -z $DIR ]; then
         echo parameter error
         return 1
@@ -38,7 +42,15 @@ function LoadGitSource() {
         git clone $REPO $DIR
         CheckCode 'load failed'
     fi
-    cd $DIR && git checkout -f $VERSION && cd ..
+    cd $DIR && git checkout -f master && \
+    if [ -n "`git tag -l $VERSION`" ]; then
+        git pull &&  git checkout -f $VERSION
+    else
+        git checkout -f $VERSION && git pull
+    fi && \
+    if [ -n "$COMMIT" ]; then
+        git reset --hard $COMMIT
+    fi && cd -
     CheckCode 'load failed'
 }
 
@@ -49,9 +61,14 @@ else
     VI_VERSION='master'
 fi
 
-if [ $PY_VERSION != 'master' ]; then
-    VI_VERSION=${VER_MAP[$PY_VERSION]}
+if [ -n "$2" ]; then
+    PY_GIT_COMMIT="$2"
 fi
+if [ -n "$3" ]; then
+    VI_GIT_COMMIT="$3"
+fi
+
+VI_VERSION=${VER_MAP[$PY_VERSION]}
 if [ -z $PY_VERSION ] || [ -z $VI_VERSION ]; then
     echo pytorch version or vision version is empty
     exit 1
@@ -63,12 +80,12 @@ echo -e \\t pytorch: $PY_VERSION
 echo -e \\t vision: $VI_VERSION
 echo '######################################################'
 echo
-LoadGitSource $REPO_PYTORCH $PY_VERSION $DIR_PYTORCH
+LoadGitSource $REPO_PYTORCH $PY_VERSION $DIR_PYTORCH $PY_GIT_COMMIT
 echo
 echo init pytorch submodules
-cd $DIR_PYTORCH && git submodule update --init --recursive && cd ..
+cd $DIR_PYTORCH && git submodule update --init --recursive -f && cd ..
 CheckCode 'init pytorch submodules failed'
 echo
-LoadGitSource $REPO_TORCHVISION $VI_VERSION $DIR_TORCHVISION
+LoadGitSource $REPO_TORCHVISION $VI_VERSION $DIR_TORCHVISION $VI_GIT_COMMIT
 echo
 echo init success
