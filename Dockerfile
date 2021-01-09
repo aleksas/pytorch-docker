@@ -56,6 +56,7 @@ RUN curl -sSL -o ~/miniconda.sh -O https://repo.anaconda.com/miniconda/Miniconda
         pyyaml \
         numpy \
         ipython \
+        magma-cuda102 \
         ${EXTRA_CONDA_PACKAGE} && \
     /opt/conda/bin/conda clean -ya
 ENV PATH /opt/conda/bin:$PATH
