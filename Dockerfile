@@ -62,6 +62,11 @@ RUN curl -sSL -o ~/miniconda.sh -O https://repo.anaconda.com/miniconda/Miniconda
         ffmpeg \
         ${EXTRA_CONDA_PACKAGE} && \
     /opt/conda/bin/conda clean -ya
+
+
+RUN /opt/conda/bin/conda install -c pytorch magma-cuda102 && \
+    /opt/conda/bin/conda clean -ya
+
 ENV PATH /opt/conda/bin:$PATH
 
 FROM dev-base as source
